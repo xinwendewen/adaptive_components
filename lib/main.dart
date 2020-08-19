@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -150,20 +152,115 @@ class ControlCenterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            var ratio = constraints.maxWidth / constraints.maxHeight;
-            if (ratio > 4 / 3) {
-              return _landscapeCard();
-            } else if (ratio < 4 / 3) {
-              return _portraitCard();
-            } else {
-              return _squareCard();
-            }
-          },
+        body: Column(
+          children: [
+            Expanded(
+                child: Row(
+              children: <Widget>[
+                ExpandedInformativeBox(),
+                ExpandedInformativeBox()
+              ],
+            )),
+            ExpandedInformativeBox(),
+            ExpandedInformativeBox(),
+            ExpandedInformativeBox(),
+          ],
         ),
+//        body: LayoutBuilder(
+//          builder: (BuildContext context, BoxConstraints constraints) {
+//            var ratio = constraints.maxWidth / constraints.maxHeight;
+//            if (ratio > 4 / 3) {
+//              return _landscapeCard();
+//            } else if (ratio < 4 / 3) {
+//              return _portraitCard();
+//            } else {
+//              return _squareCard();
+//            }
+//          },
+//        ),
       ),
     );
   }
 }
 
+class UnScrollableGallery extends StatefulWidget {
+  @override
+  _UnScrollableGalleryState createState() => _UnScrollableGalleryState();
+}
+
+class _UnScrollableGalleryState extends State<UnScrollableGallery> {
+  static const int maxRowCount = 4;
+  static const int maxColumnCount = 2;
+
+  final int maxSize = maxRowCount * maxColumnCount;
+  final List<List<int>> items = [];
+  int size;
+
+  void addItem() {
+    if (size >= maxSize) {
+      return;
+    }
+    setState(() {
+      size++;
+      var column = size % maxRowCount;
+      var row = size % maxColumnCount;
+      items[row][column] = 1;
+    });
+  }
+
+  void removeItem() {}
+
+  @override
+  Widget build(BuildContext context) {
+    List<Row> _itemToRows() {
+      var rows = <Row>[];
+      for (var row in items) {
+        rows.add(Row(
+          children: row.map((e) => ExpandedInformativeBox()).toList(),
+        ));
+      }
+    }
+
+    return Column(
+      children: _itemToRows(),
+    );
+  }
+}
+
+class ExpandedInformativeBox extends StatelessWidget {
+  Widget _constraintsWidthText(BoxConstraints constraints) {
+    return Text('constraints width [${constraints.minWidth * 10 ~/ 10},'
+        ' ${constraints.maxWidth * 10 ~/ 10}]');
+  }
+
+  Widget _constraintsHeightText(BoxConstraints constraints) {
+    return Text('constraints height [${constraints.minHeight * 10 ~/ 10},'
+        ' ${constraints.maxHeight * 10 ~/ 10}]');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Container(
+            color: _randomPrimaryColor(),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  _constraintsWidthText(constraints),
+                  _constraintsHeightText(constraints)
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+Color _randomPrimaryColor() {
+  return Colors.primaries[Random().nextInt(Colors.primaries.length)];
+}
